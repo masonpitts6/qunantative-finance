@@ -5,13 +5,14 @@ import scipy.optimize as optimize
 import seaborn as sns
 import yfinance as yf
 
+# SPY and AGG will generate the general Markowitz portfolio
 stocks = ['SPY', 'AGG', 'EEM', 'VGK']
 
 start_date = '2010-01-01'
 end_date = '2022-10-31'
 
 NUM_TRADING_DAYS = 252
-NUM_PORTFOLIO = 100_000
+NUM_PORTFOLIO = 10_000
 
 
 def download_stock_data(tickers, start_date, end_date):
@@ -192,8 +193,11 @@ def optimize_portfolio_sharpe(returns, weights):
                              constraints=constraints)
 
 
-def print_optimal_portfolio(optimum, returns):
+def print_optimal_portfolio(optimum, stocks, returns):
     print(f"Optimal portfolio: {optimum['x'].round(3)}")
+    print(f"Expected return: {portfolio_mean(returns, optimum['x']).round(3)}")
+    print(f"Expected volatility: {portfolio_volatility(returns, optimum['x']).round(3)}")
+    print(f"Sharpe ratio: {(-optimum['fun']).round(3)}")
 
 
 def plot_optimal_portfolio(optimum, returns, portfolio_returns, portfolio_volatilities):
@@ -223,3 +227,4 @@ if __name__ == '__main__':
     plot_portfolios(p_means, p_vols)
     p_optimum = optimize_portfolio_sharpe(log_returns, p_weights)
     plot_optimal_portfolio(p_optimum, log_returns, p_means, p_vols)
+    print_optimal_portfolio(p_optimum, stocks, log_returns)
