@@ -10,7 +10,7 @@ def download_ticker_data(tickers, start_date, end_date, interval='1mo'):
     :param end_date: string representing the end date of the data to be downloaded.
     :return: pandas DataFrame containing the yfinance data of the securities.
     """
-    return yf.download(tickers, start=start_date, end=end_date, interval=interval)
+    return yf.download(tickers, start=start_date, end=end_date)
 
 
 if __name__ == '__main__':

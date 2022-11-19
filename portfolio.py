@@ -1,0 +1,1 @@
+#TODO Add a class to handle the portfolio and individual stocks

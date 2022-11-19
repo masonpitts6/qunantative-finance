@@ -67,7 +67,7 @@ class CapitalAssetPricingModel:
         plt.xlabel(f"{self.market_ticker} Excess Returns")
         plt.ylabel(f"{self.tickers} Excess Returns")
         # Latex in string to display the generalized CAPM equation
-        plt.text(0.08, 0.05, r'$ERP = \alpha + \beta x MRP$', fontsize=18)
+        plt.text(0.08, 0.05, r'$ERP = \alpha + \beta x  MRP$', fontsize=18)
         plt.legend()
         plt.grid(True)
         plt.show()
