@@ -19,6 +19,18 @@ def calc_var(value, mu, sigma, confidence_level=0.95, n=1):
     """
     return value * (mu * n - sigma * np.sqrt(n) * norm.ppf(1 - confidence_level))
 
+def calc_cvar(value, mu, sigma, confidence_level=0.95, n=1):
+    """
+    Calculate the conditional value at risk of a given stock
+    :param value: pandas DataFrame - stock data
+    :param mu: float - drift of position or mean of returns
+    :param sigma: float - standard deviation of returns
+    :param confidence_level: float - confidence level
+    :param n: int - number of days
+    :return: float - conditional value at risk
+    """
+    return -value * (mu * n - sigma * np.sqrt(n) * norm.pdf(norm.ppf(1 - confidence_level)) / (1 - confidence_level))
+
 
 class VaRMonteCarlo:
 
@@ -69,6 +81,9 @@ if __name__ == '__main__':
 
     # Calculate the value at risk
     print(f"Value at risk for ${p_value:,} investment: ${calc_var(p_value, p_mu, p_sigma, c_level).round(2):,}")
+
+    # Calculate the conditional value at risk
+    print(f"Conditional value at risk for ${p_value:,} investment: ${calc_cvar(p_value, p_mu, p_sigma, c_level).round(2):,}")
 
     # Simulate the value at risk
     var_mc = VaRMonteCarlo(principal=p_value, mu=p_mu, sigma=p_sigma, confidence_level=c_level, n=1, iterations=100_000)
