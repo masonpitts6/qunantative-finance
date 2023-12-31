@@ -1,8 +1,6 @@
 import numpy as np
-import data_api as data
+from quantitative_finance.data import data_api as data
 from scipy.stats import norm
-import pandas as pd
-import matplotlib.pyplot as plt
 import datetime as dt
 
 

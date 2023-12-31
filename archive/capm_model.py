@@ -1,8 +1,6 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-import yfinance as yf
-from data_api import download_ticker_data
+from quantitative_finance.data.data_api import download_ticker_data
 
 
 class CapitalAssetPricingModel:
