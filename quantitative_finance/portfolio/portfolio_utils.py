@@ -127,7 +127,7 @@ def _get_date_offset(
     elif return_frequency == 'M':
         date_offset = pd.DateOffset(months=offset_int)
     else:
-        date_offset = None
+        date_offset = pd.Timestamp()
 
     return date_offset
 
