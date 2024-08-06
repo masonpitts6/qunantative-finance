@@ -5,10 +5,11 @@ from collections import OrderedDict
 
 
 class PeriodDateCalculator:
-    DAYS_OF_YEAR = 365
-    MONTHS_OF_YEAR = 12
-    QUARTERS_OF_YEAR = 4
-    YEARS_OF_YEAR = 1
+    DAYS_IN_YEAR = 365
+    TRADING_DAYS_IN_YEAR = 252
+    MONTHS_IN_YEAR = 12
+    QUARTERS_IN_YEAR = 4
+    YEARS_IN_YEAR = 1
 
     def __init__(
             self,
@@ -42,24 +43,34 @@ class PeriodDateCalculator:
         if return_frequency not in ['D', 'M', 'Q', 'A']:
             self._return_frequency_error(value=return_frequency)
 
-    def _return_frequency_error(self, value):
+    def _return_frequency_error(
+            self,
+            value
+    ):
         raise ValueError(
             f'"return_frequency" is {value}, which is not a valid value. Please enter "D", "M", "Q", or "A"')
 
-    def _get_periods_in_year(self):
+    def _get_periods_in_year(
+            self,
+            compounding_periods=False
+    ):
         if self.return_frequency == 'D':
-            return self.DAYS_OF_YEAR
+            if compounding_periods:
+                return self.TRADING_DAYS_IN_YEAR
+            return self.DAYS_IN_YEAR
         elif self.return_frequency == 'M':
-            return self.MONTHS_OF_YEAR
+            return self.MONTHS_IN_YEAR
         elif self.return_frequency == 'Q':
-            return self.QUARTERS_OF_YEAR
+            return self.QUARTERS_IN_YEAR
         elif self.return_frequency == 'A':
-            return self.YEARS_OF_YEAR
+            return self.YEARS_IN_YEAR
         else:
             self._return_frequency_error(value=self.return_frequency)
 
-    def calc_period_dates(self, periods: Optional[OrderedDict[str, Union[float, None]]] = None) -> OrderedDict[
-        str, OrderedDict[str, Union[Tuple[pd.Timestamp, pd.Timestamp], Tuple[int, int]]]]:
+    def calc_period_dates(
+            self,
+            periods: Optional[OrderedDict[str, Union[float, None]]] = None
+    ) -> OrderedDict[str, OrderedDict[str, Union[Tuple[pd.Timestamp, pd.Timestamp], Tuple[int, int]]]]:
         """
         Calculates the start and end dates for various periods based on the portfolio dates.
 
@@ -79,7 +90,7 @@ class PeriodDateCalculator:
         return self._calculate_period_dates(adjusted_periods)
 
     @staticmethod
-    def _default_periods(self) -> OrderedDict[str, Optional[float]]:
+    def _default_periods() -> OrderedDict[str, Optional[float]]:
         """
         Provides the default periods for calculation.
 
@@ -102,7 +113,10 @@ class PeriodDateCalculator:
             ("Inception", None)
         ])
 
-    def _adjust_periods(self, periods: OrderedDict[str, Optional[float]]) -> OrderedDict[str, Optional[float]]:
+    def _adjust_periods(
+            self,
+            periods: OrderedDict[str, Optional[float]]
+    ) -> OrderedDict[str, Optional[float]]:
         """
         Adjusts the periods based on the return frequency.
 
@@ -131,6 +145,7 @@ class PeriodDateCalculator:
         period_dates = OrderedDict()
         start_date = self.portfolio_dates[0]
         end_date = self.portfolio_dates[-1]
+        compounding_period = self._get_periods_in_year(compounding_periods=True)
 
         for period_name, adjusted_period_length in periods.items():
             date_offset = self._get_date_offset(adjusted_period_length) if adjusted_period_length is not None else None
@@ -147,7 +162,7 @@ class PeriodDateCalculator:
                 calculated_end_date = start_date + date_offset if self.fixed_start else end_date
                 calculated_start_date = end_date - date_offset if not self.fixed_start else start_date
 
-            period_length = (calculated_end_date - calculated_start_date).days / self.DAYS_OF_YEAR
+            period_length = (calculated_end_date - calculated_start_date).days / self.DAYS_IN_YEAR
 
             closest_start_date, start_index = self._find_closest_date_and_index(
                 target_date=calculated_start_date
@@ -159,12 +174,16 @@ class PeriodDateCalculator:
             period_dates[period_name] = OrderedDict([
                 ('Dates', (closest_start_date, closest_end_date)),
                 ('Indices', (start_index, end_index)),
-                ('Number of Years', period_length)
+                ('Number of Years', period_length),
+                ('Compounding Periods in Year', compounding_period)
             ])
 
         return period_dates
 
-    def _find_closest_date_and_index(self, target_date: pd.Timestamp) -> Tuple[pd.Timestamp, int]:
+    def _find_closest_date_and_index(
+            self,
+            target_date: pd.Timestamp
+    ) -> Tuple[pd.Timestamp, int]:
         """
         Finds the closest date in the portfolio dates to the target date and its index.
 
@@ -177,7 +196,10 @@ class PeriodDateCalculator:
         closest_date_idx = np.argmin(np.abs(self.portfolio_dates - target_date))
         return self.portfolio_dates[closest_date_idx], closest_date_idx
 
-    def _get_date_offset(self, period_length: Optional[float]) -> pd.DateOffset:
+    def _get_date_offset(
+            self,
+            period_length: Optional[float]
+    ) -> pd.DateOffset:
         """
         Generates a date offset based on the period length and return frequency.
 
